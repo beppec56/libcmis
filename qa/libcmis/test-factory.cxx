@@ -64,7 +64,7 @@
 
 #define GDRIVE_AUTH_URL string ( "https://auth/url" )
 #define GDRIVE_LOGIN_URL  string ("https://login/url" )
-#define GDRIVE_LOGIN_URL2  string ("https://login/url2" )
+#define GDRIVE_LOGIN_URL2  string ("https://login2/url" )
 #define GDRIVE_APPROVAL_URL  string ("https://approval/url" )
 #define GDRIVE_TOKEN_URL  string ( "https://token/url" )
 
