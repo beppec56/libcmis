@@ -117,8 +117,13 @@ namespace mockup
         return !m_username.empty( ) && !m_password.empty( );
     }
 
+    /** Find a suitable response
+     * using the request as a search key
+     */
     CURLcode Configuration::writeResponse( CurlHandle* handle )
     {
+        cout <<"Configuration::writeResponse - "
+            << __FILE__ <<":"<< __LINE__ << endl;
         CURLcode code = CURLE_OK;
 
         string headers;
@@ -143,6 +148,15 @@ namespace mockup
             bool matchMethod = it->first.m_method.empty( ) || ( it->first.m_method == method );
             bool matchBody = matcher.m_matchBody.empty( ) || ( body.find( matcher.m_matchBody ) != string::npos );
 
+            cout << "Request is:  urlBase: "<<urlBase
+                 << ", params: "<<params
+                 <<", method: " <<method
+                 <<", body: " << body
+                 <<endl;
+
+            cout << "current testing: "
+                 << "matcher.m_baseUrl: "<<matcher.m_baseUrl
+                 << endl;
             if ( matchBaseUrl && matchParams && matchMethod && matchBody )
             {
                 foundResponse = true;
@@ -216,6 +230,7 @@ namespace mockup
 
 void curl_mockup_reset( )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     if ( mockup::config != NULL )
         delete mockup::config;
     mockup::config = new mockup::Configuration( );
@@ -225,6 +240,7 @@ void curl_mockup_addResponse( const char* urlBase, const char* matchParam, const
                               const char* response, unsigned int status, bool isFilePath,
                               const char* headers, const char* matchBody )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     string matchBodyStr;
     if ( matchBody )
         matchBodyStr = matchBody;
@@ -236,18 +252,30 @@ void curl_mockup_addResponse( const char* urlBase, const char* matchParam, const
     string headersStr;
     if ( headers != NULL )
         headersStr = headers;
+    cout <<"curl_mockup_addResponse - "
+        << "urlBase: "<<urlBase
+         <<", matchParam: "<<matchParam
+         <<", method: " <<method
+         <<", response: " << response
+         <<", status: " << status
+         <<", isFilePath: " <<isFilePath
+         <<", headersStr: " <<headersStr
+         <<", matchBodyStr: " <<matchBodyStr
+         <<" -:" << __LINE__ << endl;
     mockup::Response responseDesc( response, status, isFilePath, headersStr );
     mockup::config->m_responses.insert( pair< mockup::RequestMatcher, mockup::Response >( matcher, responseDesc ) );
 }
 
 void curl_mockup_setResponse( const char* filepath )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     mockup::config->m_responses.clear( );
     curl_mockup_addResponse( "", "", "", filepath );
 }
 
 void curl_mockup_setCredentials( const char* username, const char* password )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     mockup::config->m_username = string( username );
     mockup::config->m_password = string( password );
 }
@@ -257,6 +285,8 @@ const struct HttpRequest* curl_mockup_getRequest( const char* urlBase,
                                                   const char* method,
                                                   const char* matchBody )
 {
+    cout << "curl_mockup_getRequest -"
+        << __FILE__ <<":"<< __LINE__ << endl;
     struct HttpRequest* request = NULL;
 
     string urlBaseString( urlBase );
@@ -275,6 +305,7 @@ const struct HttpRequest* curl_mockup_getRequest( const char* urlBase,
         {
             lcl_splitUrl( it->m_url, url, params );
 
+            cout <<"curl_mockup_getRequest - url: "<<url<<", params: "<<params<<endl;
             bool matchBaseUrl = urlBaseString.empty() || ( url.find( urlBaseString ) == 0 );
             bool matchParams = matchParamString.empty( ) || ( params.find( matchParamString ) != string::npos );
             bool matchBodyPart = !matchBody || ( it->m_body.find( matchBodyStr ) != string::npos );
@@ -285,6 +316,7 @@ const struct HttpRequest* curl_mockup_getRequest( const char* urlBase,
                 request->url = it->m_url.c_str();
                 request->body = it->m_body.c_str();
                 request->headers = lcl_toStringArray( it->m_headers );
+                cout << "curl_mockup_getRequest - FOUND ! url: "<<request->url<<", body: "<<request->body<<endl;
             }
         }
     }
@@ -297,6 +329,7 @@ const char* curl_mockup_getRequestBody( const char* urlBase,
                                         const char* method,
                                         const char* matchBody )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     const struct HttpRequest* request = curl_mockup_getRequest( urlBase, matchParam, method, matchBody );
     if ( request )
     {
@@ -312,6 +345,7 @@ int curl_mockup_getRequestsCount( const char* urlBase,
                                   const char* method,
                                   const char* matchBody )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     int count = 0;
 
     string urlBaseString( urlBase );
@@ -345,12 +379,14 @@ int curl_mockup_getRequestsCount( const char* urlBase,
 
 void curl_mockup_HttpRequest_free( const struct HttpRequest* request )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     delete[] request->headers;
     delete request;
 }
 
 char* curl_mockup_HttpRequest_getHeader( const struct HttpRequest* request, const char* name )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     char* value = NULL;
     size_t i = 0;
     while ( request->headers[i] != NULL && value == NULL )
@@ -369,6 +405,7 @@ char* curl_mockup_HttpRequest_getHeader( const struct HttpRequest* request, cons
 
 const char* curl_mockup_getProxy( CURL* curl )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     CurlHandle* handle = static_cast< CurlHandle* >( curl );
     if ( NULL != handle )
         return handle->m_proxy.c_str();
@@ -377,6 +414,7 @@ const char* curl_mockup_getProxy( CURL* curl )
 
 const char* curl_mockup_getNoProxy( CURL* curl )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     CurlHandle* handle = static_cast< CurlHandle* >( curl );
     if ( NULL != handle )
         return handle->m_noProxy.c_str();
@@ -385,6 +423,7 @@ const char* curl_mockup_getNoProxy( CURL* curl )
 
 const char* curl_mockup_getProxyUser( CURL* curl )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     CurlHandle* handle = static_cast< CurlHandle* >( curl );
     if ( NULL != handle )
         return handle->m_proxyUser.c_str();
@@ -393,6 +432,7 @@ const char* curl_mockup_getProxyUser( CURL* curl )
 
 const char* curl_mockup_getProxyPass( CURL* curl )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     CurlHandle* handle = static_cast< CurlHandle* >( curl );
     if ( NULL != handle )
         return handle->m_proxyPass.c_str();
@@ -401,5 +441,6 @@ const char* curl_mockup_getProxyPass( CURL* curl )
 
 void curl_mockup_setSSLBadCertificate( const char* certificate )
 {
+    cout << __FILE__ <<":"<< __LINE__ << endl;
     mockup::config->m_badSSLCertificate = string( certificate );
 }
