@@ -254,6 +254,7 @@ libcmis::HttpResponsePtr HttpSession::httpGetRequest( string url ) throw ( CurlE
     // said it was 0
     curl_easy_setopt( m_curlHandle, CURLOPT_MAXREDIRS, 100);
 
+    cout << "HttpSession::httpGetRequest - url: "<<url<<endl;
     try
     {
         httpRunRequest( url );
@@ -414,6 +415,7 @@ libcmis::HttpResponsePtr HttpSession::httpPostRequest( const string& url, istrea
     // don't even try with it to save one HTTP request.
     if ( m_no100Continue )
         headers.push_back( "Expect:" );
+    cout << "HttpSession::httpPostRequest - url: "<<url <<", body: "<<isStr<<endl;
     try
     {
         httpRunRequest( url, headers, redirect );

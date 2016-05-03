@@ -58,6 +58,7 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     string res;
     try
     {
+        cout << "OAuth2Providers::OAuth2Gdrive 1a - get ---- html start page to login ----------------"<<endl;
         // send the first get, receive the html login page
         res = session->httpGetRequest( authUrl )->getStream( )->str( );
     }
@@ -65,6 +66,12 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     {
         return string( );
     }
+
+    cout << "======================="<<endl
+         <<"OAuth2Providers::OAuth2Gdrive 1 - received html page" <<endl
+         <<"OAuth2Providers::OAuth2Gdrive 1a - received html page to provide email" <<endl
+         << res.c_str( ) << endl
+         << "=======================" << endl;
 
     string loginEmailPost, loginEmailLink;
     if ( !parseResponse( res.c_str( ), loginEmailPost, loginEmailLink ) )
@@ -78,6 +85,7 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     try
     {
         // send a post with user email, receive the html page for password input
+        cout << "OAuth2Providers::OAuth2Gdrive 1a POST - "<<loginEmailLink<<" "<<loginEmailPost <<endl;
         loginEmailRes = session->httpPostRequest ( loginEmailLink, loginEmailIs, CONTENT_TYPE )
                         ->getStream( )->str( );
     }
@@ -85,6 +93,12 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     {
         return string( );
     }
+
+    cout << "======================="<<endl
+         <<"OAuth2Providers::OAuth2Gdrive 1 - received html page" <<endl
+         <<"OAuth2Providers::OAuth2Gdrive 1b - received html page to provide password" <<endl
+         << loginEmailRes.c_str( ) << endl
+         << "=======================" << endl;
 
     string loginPasswdPost, loginPasswdLink;
     if ( !parseResponse( loginEmailRes.c_str( ), loginPasswdPost, loginPasswdLink ) )
@@ -98,6 +112,7 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     try
     {
         // send a post with user password, receive the application consent page
+        cout << "OAuth2Providers::OAuth2Gdrive 1b POST - "<<loginPasswdLink<<" "<<loginPasswdPost <<endl;
         loginPasswdRes = session->httpPostRequest ( loginPasswdLink, loginPasswdIs, CONTENT_TYPE )
                         ->getStream( )->str( );
     }
@@ -105,6 +120,12 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     {
         return string( );
     }
+
+    cout << "======================="<<endl
+         <<"OAuth2Providers::OAuth2Gdrive 2 - received html page" <<endl
+         <<"OAuth2Providers::OAuth2Gdrive 2 - application consent page" <<endl
+         << loginPasswdRes.c_str( ) << endl
+         << "=======================" << endl;
 
     // STEP 2: allow libcmis to access google drive
     string approvalPost, approvalLink;
@@ -124,6 +145,12 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     {
         throw e.getCmisException( );
     }
+
+    cout << "======================="<<endl
+         <<"OAuth2Providers::OAuth2Gdrive 3 - received html page" <<endl
+         <<"OAuth2Providers::OAuth2Gdrive 3 - the token received" <<endl
+         << approvalRes.c_str( ) << endl
+         << "=======================" << endl;
 
     // STEP 3: Take the authentication code from the text bar
     string code = parseCode( approvalRes.c_str( ) );
