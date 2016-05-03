@@ -104,7 +104,7 @@ string OAuth2Providers::OAuth2Gdrive( HttpSession* session, const string& authUr
     if ( !parseResponse( loginEmailRes.c_str( ), loginPasswdPost, loginPasswdLink ) )
         return string( );
 
-    loginPasswdPost += "&Passwd=";
+    loginPasswdPost += "Passwd=";
     loginPasswdPost += string( password );
 
     istringstream loginPasswdIs( loginPasswdPost );
